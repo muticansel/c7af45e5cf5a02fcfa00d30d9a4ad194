@@ -8,9 +8,32 @@ import {
   TableRow,
   Paper,
   TablePagination,
+  TextField,
 } from "@mui/material";
+import { tableCellClasses } from '@mui/material/TableCell'
+import { styled } from '@mui/material/styles';
 import ProductDetail from "./ProductDetail";
 import { dummyProducts } from "../data/dummy";
+
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  [`&.${tableCellClasses.head}`]: {
+    backgroundColor: theme.palette.common.black,
+    color: theme.palette.common.white,
+  },
+  [`&.${tableCellClasses.body}`]: {
+    fontSize: 14,
+  },
+}));
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  '&:nth-of-type(odd)': {
+    backgroundColor: theme.palette.action.hover,
+  },
+  // hide last border
+  '&:last-child td, &:last-child th': {
+    border: 0,
+  },
+}));
 
 const createData = (id, itemName, price) => {
   return { id, itemName, price };
@@ -65,14 +88,14 @@ const LandingPage = () => {
 
   // When a row is selected
   useEffect(() => {
-    const getHashDetail = async () => {
-      setOpenModal(true);
+    const getProductDetail = async () => {
       const product = filteredData.find(
         (product) => product.itemName === selectedProduct
       );
       setProductDetail(product);
     };
-    if (selectedProduct) getHashDetail();
+    if (selectedProduct) 
+      getProductDetail();
   }, [selectedProduct, filteredData]);
 
   // Sets the 'page' and the data
@@ -94,6 +117,7 @@ const LandingPage = () => {
 
   // Gets
   const getProductDetail = (productName) => {
+    setOpenModal(true);
     setSelectedProduct(productName);
   };
 
@@ -101,44 +125,68 @@ const LandingPage = () => {
   const renderData = () => {
     const filteredProducts = filteredData.map((row) => {
       return (
-        <TableRow
-          key={row.itemName}
+        <StyledTableRow
+          key={row.id}
           onClick={() => getProductDetail(row.itemName)}
         >
           <TableCell>{row.itemName}</TableCell>
           <TableCell>{row.price}</TableCell>
-        </TableRow>
+        </StyledTableRow>
       );
     });
 
     return filteredProducts;
   };
 
+  const searchHandler = (searchText) => {
+    const filterData = async () => {
+      const filteredSearchData = products.filter((product) =>
+        product.itemName.toLowerCase().includes(searchText.toLowerCase())
+      );
+      await setFilteredData(filteredSearchData);
+      await setDataLength(filteredSearchData.length);
+    };
+
+    filterData();
+  };
+
   return (
-    <TableContainer component={Paper}>
-      <Table aria-label="customized table">
-        <TableHead>
-          <TableRow>
-            <TableCell>Item Name</TableCell>
-            <TableCell>Price</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>{renderData()}</TableBody>
-      </Table>
-      <TablePagination
-        component="div"
-        count={dataLength}
-        page={page}
-        onPageChange={handleChangePage}
-        rowsPerPage={rowsPerPage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-      />
-      <ProductDetail
-        open={openModal}
-        handleClose={closeModal}
-        productDetail={productDetail}
-      />
-    </TableContainer>
+    <div style={{ padding: "15px" }}>
+      <div style={{ marginBottom: "60px" }}>
+        <TextField
+          id="outlined-basic"
+          label="Item Name"
+          variant="outlined"
+          placeholder="Search Item Name"
+          fullWidth
+          onChange={(e) => searchHandler(e.target.value)}
+        />
+      </div>
+      <TableContainer component={Paper}>
+        <Table aria-label="customized table">
+          <TableHead>
+            <TableRow>
+              <StyledTableCell>Item Name</StyledTableCell>
+              <StyledTableCell>Price</StyledTableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>{renderData()}</TableBody>
+        </Table>
+        <TablePagination
+          component="div"
+          count={dataLength}
+          page={page}
+          onPageChange={handleChangePage}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
+        <ProductDetail
+          open={openModal}
+          handleClose={closeModal}
+          productDetail={productDetail}
+        />
+      </TableContainer>
+    </div>
   );
 };
 
