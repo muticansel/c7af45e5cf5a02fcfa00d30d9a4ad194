@@ -35,14 +35,6 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
-const createData = (id, itemName, price) => {
-  return { id, itemName, price };
-};
-
-const prods = dummyProducts.slice(0, 15).map((product) => {
-  return createData(product.id, product.title, product.variants[0].price);
-});
-
 const LandingPage = () => {
   const [dataLength, setDataLength] = useState(15);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -55,21 +47,18 @@ const LandingPage = () => {
 
   useEffect(() => {
     const getData = async () => {
-      // const response = await fetch(
-      //   `https://teknasyon.myshopify.com/admin/api/2022-01/products.json`,
-      //   {
-      //     mode: "cors",
-      //     headers: {
-      //       'X-Shopify-Access-Token': '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',
-      //       "Access-Control-Allow-Origin": "*"
-      //     }
-      //   }
-      // );
-      // const data = await response.json();
-      // setProducts(data.products);
-      // setDataLength(data.products.length);
-      setProducts(prods);
-      setDataLength(prods.length);
+      const response = await fetch(
+        `https://teknasyon.netlify.app/.netlify/functions/products`,
+        {
+          mode: "cors",
+          headers: {
+            'X-Access-Token': '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',
+          }
+        }
+      );
+      const data = await response.json();
+      setProducts(data.products);
+      setDataLength(data.products.length);
     };
 
     getData();
@@ -127,10 +116,10 @@ const LandingPage = () => {
       return (
         <StyledTableRow
           key={row.id}
-          onClick={() => getProductDetail(row.itemName)}
+          onClick={() => getProductDetail(row.title)}
         >
-          <TableCell>{row.itemName}</TableCell>
-          <TableCell>{row.price}</TableCell>
+          <TableCell>{row.title}</TableCell>
+          <TableCell>{row.variants[0].price}</TableCell>
         </StyledTableRow>
       );
     });
@@ -141,7 +130,7 @@ const LandingPage = () => {
   const searchHandler = (searchText) => {
     const filterData = async () => {
       const filteredSearchData = products.filter((product) =>
-        product.itemName.toLowerCase().includes(searchText.toLowerCase())
+        product.title.toLowerCase().includes(searchText.toLowerCase())
       );
       await setFilteredData(filteredSearchData);
       await setDataLength(filteredSearchData.length);
