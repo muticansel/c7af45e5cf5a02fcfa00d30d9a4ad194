@@ -9,11 +9,12 @@ import {
   Paper,
   TablePagination,
   TextField,
+  InputAdornment,
 } from "@mui/material";
-import { tableCellClasses } from '@mui/material/TableCell'
-import { styled } from '@mui/material/styles';
+import { tableCellClasses } from "@mui/material/TableCell";
+import { styled } from "@mui/material/styles";
 import ProductDetail from "./ProductDetail";
-import { dummyProducts } from "../data/dummy";
+import IconSearch from "@mui/icons-material/Search";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -26,14 +27,19 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
 }));
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  '&:nth-of-type(odd)': {
+  "&:nth-of-type(odd)": {
     backgroundColor: theme.palette.action.hover,
   },
   // hide last border
-  '&:last-child td, &:last-child th': {
+  "&:last-child td, &:last-child th": {
     border: 0,
   },
 }));
+
+const StyledTextField = styled(TextField)({
+  '& .MuiOutlinedInput-root': {
+  }
+});
 
 const LandingPage = () => {
   const [dataLength, setDataLength] = useState(15);
@@ -52,8 +58,8 @@ const LandingPage = () => {
         {
           mode: "cors",
           headers: {
-            'X-Access-Token': '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',
-          }
+            "X-Access-Token": "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",
+          },
         }
       );
       const data = await response.json();
@@ -83,8 +89,7 @@ const LandingPage = () => {
       );
       setProductDetail(product);
     };
-    if (selectedProduct) 
-      getProductDetail();
+    if (selectedProduct) getProductDetail();
   }, [selectedProduct, filteredData]);
 
   // Sets the 'page' and the data
@@ -141,13 +146,19 @@ const LandingPage = () => {
 
   return (
     <div style={{ padding: "15px" }}>
-      <div style={{ marginBottom: "60px" }}>
-        <TextField
+      <div style={{ marginBottom: "60px", float: 'left' }}>
+        <StyledTextField
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <IconSearch />
+              </InputAdornment>
+            ),
+          }}
           id="outlined-basic"
           label="Item Name"
           variant="outlined"
           placeholder="Search Item Name"
-          fullWidth
           onChange={(e) => searchHandler(e.target.value)}
         />
       </div>
