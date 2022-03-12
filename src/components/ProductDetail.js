@@ -1,27 +1,44 @@
 import React, { forwardRef } from "react";
-import {
-  Dialog,
-  DialogTitle,
-  Slide,
-} from "@mui/material";
+import { Dialog, DialogTitle, Slide, List } from "@mui/material";
+import DetailRow from "./DetailRow";
+import { styled } from "@mui/material/styles";
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const ProductDetail = (props) => {
+const StyledDialogTİtle = styled(DialogTitle)({
+  [`&.MuiTypography-root`]: {
+    textAlign: 'center'
+  }
+});
+
+const ProductDetail = ({ productDetail, handleClose, open }) => {
   return (
     <Dialog
-      onClose={props.handleClose}
-      open={props.open}
+      onClose={handleClose}
+      open={open}
       TransitionComponent={Transition}
       fullwidth="true"
       maxWidth="lg"
     >
-      <DialogTitle id="simple-dialog-title" style={{ textAlign: "center" }}>
+      <StyledDialogTİtle id="simple-dialog-title">
         Product Detail
-      </DialogTitle>
-      {/* {!props.blockDetail && <Spinner />} */}
+      </StyledDialogTİtle>
+      <List>
+        {productDetail && (
+          <DetailRow title="Vendor" value={productDetail.vendor} />
+        )}
+        {productDetail && (
+          <DetailRow title="Product Type" value={productDetail.product_type} />
+        )}
+        {productDetail && (
+          <DetailRow
+            title="Inventory Management"
+            value={productDetail.variants[0].inventory_management}
+          />
+        )}
+      </List>
     </Dialog>
   );
 };
