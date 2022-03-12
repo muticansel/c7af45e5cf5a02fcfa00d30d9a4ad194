@@ -15,6 +15,7 @@ import { tableCellClasses } from "@mui/material/TableCell";
 import { styled } from "@mui/material/styles";
 import ProductDetail from "./ProductDetail";
 import IconSearch from "@mui/icons-material/Search";
+import Spinner from "../UI/Spinner";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -37,13 +38,13 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 }));
 
 const StyledTextField = styled(TextField)({
-  '& .MuiOutlinedInput-root': {
-  }
+  "& .MuiOutlinedInput-root": {},
 });
 
 const LandingPage = () => {
   const [dataLength, setDataLength] = useState(15);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [searchText, setSearchText] = useState("");
   const [page, setPage] = useState(0);
   const [products, setProducts] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -53,15 +54,12 @@ const LandingPage = () => {
 
   useEffect(() => {
     const getData = async () => {
-      const response = await fetch(
-        process.env.REACT_APP_API,
-        {
-          mode: "cors",
-          headers: {
-            "X-Access-Token": process.env.REACT_APP_SECRET,
-          },
-        }
-      );
+      const response = await fetch(process.env.REACT_APP_API, {
+        mode: "cors",
+        headers: {
+          "X-Access-Token": process.env.REACT_APP_SECRET,
+        },
+      });
       const data = await response.json();
       setProducts(data.products);
       setDataLength(data.products.length);
@@ -74,18 +72,22 @@ const LandingPage = () => {
     // Filters the data according to the 'page' and 'rowsPerPage'
     const filterData = () => {
       const startIndex = rowsPerPage * page;
-      const filteredData = products.slice(startIndex, startIndex + rowsPerPage);
+      const filteredData = products
+        .filter((product) => {
+          return product.title.toLowerCase().includes(searchText.toLowerCase());
+        })
+        .slice(startIndex, startIndex + rowsPerPage);
       setFilteredData(filteredData);
     };
 
     filterData();
-  }, [products, page, rowsPerPage]);
+  }, [products, page, rowsPerPage, searchText]);
 
   // When a row is selected
   useEffect(() => {
     const getProductDetail = async () => {
       const product = filteredData.find(
-        (product) => product.itemName === selectedProduct
+        (product) => product.title === selectedProduct
       );
       setProductDetail(product);
     };
@@ -134,19 +136,26 @@ const LandingPage = () => {
 
   const searchHandler = (searchText) => {
     const filterData = async () => {
-      const filteredSearchData = products.filter((product) =>
-        product.title.toLowerCase().includes(searchText.toLowerCase())
+      const startIndex = rowsPerPage * page;
+      const filteredSearchData = products.filter((product) => {
+        return product.title.toLowerCase().includes(searchText.toLowerCase());
+      });
+      await setSearchText(searchText);
+      await setFilteredData(
+        filteredSearchData.slice(startIndex, startIndex + rowsPerPage)
       );
-      await setFilteredData(filteredSearchData);
       await setDataLength(filteredSearchData.length);
     };
 
     filterData();
   };
 
+  if(!products.length)
+    return <Spinner />
+
   return (
     <div style={{ padding: "15px" }}>
-      <div style={{ marginBottom: "60px", float: 'left' }}>
+      <div style={{ marginBottom: "60px", float: "left" }}>
         <StyledTextField
           InputProps={{
             startAdornment: (
