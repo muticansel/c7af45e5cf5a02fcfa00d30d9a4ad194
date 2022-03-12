@@ -54,11 +54,11 @@ const LandingPage = () => {
   useEffect(() => {
     const getData = async () => {
       const response = await fetch(
-        `https://teknasyon.netlify.app/.netlify/functions/products`,
+        process.env.REACT_APP_API,
         {
           mode: "cors",
           headers: {
-            "X-Access-Token": "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",
+            "X-Access-Token": process.env.REACT_APP_SECRET,
           },
         }
       );
